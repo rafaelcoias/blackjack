@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: Gotham;
+  src: url('../content/fonts/GothamMedium.ttf');
+}
+
+@font-face {
+  font-family: GothamBold;
+  src: url('../content/fonts/GothamBold.ttf');
+}
+
+@font-face {
+  font-family: GothamLight;
+  src: url('../content/fonts/GothamLight.ttf');
+}
+
+@font-face {
+  font-family: Horizon;
+  src: url('../content/fonts/Horizon.ttf');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Gotham, sans-serif;
+}
+
+html, body {
+  background-color: var(--secondary);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+:root {
+  --primary: #44e115;
+  --secondary: #0018f1;
+  --dark: #002929;
+  --light: #f1f1f1;
+}
+
+.font-bold {
+  font-family: GothamBold;
+}
+
+.font-light {
+  font-family: GothamLight;
+}
+
+.font-Horizon {
+  font-family: Horizon;
+}
+
+.button {
+  font-size: .9rem;
+  padding-inline: 3rem;
+  padding-block: .7rem;
+  background-color: var(--primary);
+  color: var(--dark);
+  border-radius: 10px;
+  border: transparent 2px solid;
+  transition: all 300ms ease-in-out;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 400px) {
+  .button {
+    padding-inline: 2rem;
+  }
+}
+
+.button:hover,
+.button:focus {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.reverse-button {
+  font-size: .9rem;
+  padding-inline: 3rem;
+  padding-block: .7rem;
+  background-color: transparent;
+  color: var(--primary);
+  border-radius: 10px;
+  border: 2px solid var(--primary);
+  transition: all 300ms ease-in-out;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reverse-button:hover,
+.reverse-button:focus {
+  background-color: var(--primary);
+  color: var(--dark);
+  border: transparent 2px solid;
+}
+
+.input {
+  width: 18rem;
+  padding-inline: 1rem;
+  padding-block: .5rem;
+  border-radius: 10px;
+  border: var(--primary) 2px solid;
+  background-color: var(--dark);
+  color: var(--light);
+  outline: none;
+  font-family: GothamLight;
+  font-size: normal;
+}
+
+.input:focus {
+  box-shadow: 0 0 10px var(--light);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Reveals */
+
+.reveal {
+  opacity: 0;
+  transition: all 800ms ease;
+}
+
+.slide-left {
+  transform: translateX(-2rem);
+}
+
+.slide-right {
+  transform: translateX(2rem);
+}
+
+.slide-down {
+  transform: translateY(2rem);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* ScrollBar */
+
+/* Handle */
+body::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 100vw;
+}
+
+/* Handle */
+body::-webkit-scrollbar-thumb:active {
+  background-color: var(--dark);
+  border-radius: 100vw;
+}
+
+/* Track */
+body::-webkit-scrollbar-track {
+  background-color: white;
+  border-radius: 100vw;
+}
+
+body::-webkit-scrollbar {
+  background-color: transparent;
+  width: .65rem;
+}
+
+#map-dot-border {
+  width: 10px;
+  height: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: solid 1px white;
+  border-radius: 100vw;
+  animation: wave 2000ms linear infinite;
+}
+
+#map-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 100vw;
+  border: solid 1px transparent;
+  background-color: var(--primary);
+  opacity: 0;
+  animation: pulse 2000ms linear infinite;
+}    
+
+@keyframes pulse {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+@keyframes wave {
+  100% {
+      border: solid 1px transparent;
+      width: 25px;
+      height: 25px;
+      transform: translate(-7px, -7px);
+  }
+}

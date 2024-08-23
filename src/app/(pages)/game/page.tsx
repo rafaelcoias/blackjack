@@ -62,26 +62,10 @@ const Game: React.FC = () => {
     }
   };
 
-  const getHandSum = (hand: CardI[]): string => {
-    let sum = hand.reduce((acc, card) => acc + card.value, 0);
-    let numAces = hand.filter((card) => card.rank === "A").length;
-  
-    // This will store the potential lower sum if Aces are reduced to 1
-    let minSum = sum;
-  
-    while (minSum > 21 && numAces > 0) {
-      minSum -= 10;
-      numAces--;
-    }
-  
-    // If both sums are the same, just return one value
-    if (sum === minSum) {
-      return `${sum}/${sum}`;
-    } else {
-      return `${minSum}/${sum}`;
-    }
+  const getHandSum = (hand: CardI[]): number => {
+    return hand.reduce((acc, card) => acc + card.value, 0);
   };
-  
+
   const getDealerHandSum = (hand: CardI[]): number => {
     if (playing) return hand[0]!.value;
     return hand.reduce((acc, card) => acc + card.value, 0);
@@ -105,19 +89,16 @@ const Game: React.FC = () => {
   const checkWinner = () => {
     const dealerSum = getDealerHandSum(dealerHand);
     const sum = getHandSum(hand);
-    const minSum = parseInt(sum.split("/")[0]);
-    const maxSum = parseInt(sum.split("/")[1]);
     if (dealerSum > 21) {
       alert("Dealer Busts! You win!");
-      return ;
     }
     if (dealerSum < 17) {
       dealCards("dealer", 1);
       return ;
     }
-    if (dealerSum === minSum) {
+    if (dealerSum === sum) {
       alert("Push!");
-    } else if (dealerSum > minSum) {
+    } else if (dealerSum > sum) {
       alert("Dealer Wins!");
     } else if (sum > dealerSum) {
       alert("You win!");

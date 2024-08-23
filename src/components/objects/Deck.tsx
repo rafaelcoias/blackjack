@@ -32,8 +32,8 @@ export class Deck {
     this.deck = [];
 
     for (let i = 0; i < this.numDecks; i++) {
-      for (let suit of suits) {
-        for (let rank of ranks) {
+      for (const suit of suits) {
+        for (const rank of ranks) {
           this.deck.push(new Card(suit, rank, i));
         }
       }
@@ -43,13 +43,15 @@ export class Deck {
   }
 
   shuffle(): void {
-    let currentIndex = this.deck.length,
-      randomIndex: number;
+    let currentIndex = this.deck.length;
+    let randomIndex: number;
+
     while (currentIndex !== 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
-      let temp:CardI = this.deck[currentIndex] as CardI;
-      this.deck[currentIndex] = this.deck[randomIndex] as CardI;
+
+      const temp: CardI = this.deck[currentIndex]!;
+      this.deck[currentIndex] = this.deck[randomIndex]!;
       this.deck[randomIndex] = temp;
     }
   }

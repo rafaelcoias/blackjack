@@ -1,9 +1,9 @@
 import React from 'react';
-
+// eslint-disable-next-line no-unused-vars 
 interface ButtonProps {
     color?: string;
     style: string;
-    onClick: () => {} | void;
+    onClick: () => void;
     children: React.ReactNode;
 }
 

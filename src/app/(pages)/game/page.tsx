@@ -9,8 +9,6 @@ const Game: React.FC = () => {
   const [deck, setDeck] = useState<Deck>(() => new Deck(6));
   const [hand, setHand] = useState<CardI[]>([]);
   const [dealerHand, setDealerHand] = useState<CardI[]>([]);
-  const [sum, setSum] = useState<number>(0);
-  const [dealerSum, setDealerSum] = useState<number>(0);
   const [deckNeedReset, setDeckNeedReset] = useState<boolean>(false);
   const [nextRound, setNextRound] = useState<boolean>(false);
   const [playing, setPlaying] = useState<boolean>(false);
@@ -26,6 +24,7 @@ const Game: React.FC = () => {
   // Check if player busts or gets blackjack
   useEffect(() => {
     if (!gameStarted) return;
+    const sum = getHandSum(hand);
     if (sum > 21) {
       alert("Bust!");
       setNextRound(true);
@@ -35,34 +34,14 @@ const Game: React.FC = () => {
       setNextRound(true);
       setPlaying(false);
     }
-  }, [sum]);
+  }, [hand]);
 
   // Check if dealer busts, wins, or pushes
   // If dealer has less than 17, deal another card
   useEffect(() => {
     if (!gameStarted || playing) return;
-    if (dealerSum > 21) {
-      alert("Dealer Busts! You win!");
-      setNextRound(true);
-      setPlaying(false);
-      return;
-    }
-    if (dealerSum === sum && dealerSum >= 17) {
-      alert("Push!");
-      setNextRound(true);
-      setPlaying(false);
-      return;
-    }
-    if (dealerSum > sum && dealerSum >= 17) {
-      alert("Dealer Wins!");
-      setNextRound(true);
-      setPlaying(false);
-      return;
-    }
-    if (!playing && dealerSum < 17) {
-      dealCards("dealer", 1);
-    }
-  }, [dealerSum]);
+    checkWinner();
+  }, [dealerHand]);
 
   const dealCards = (player: string, count: number): void => {
     if (deck.deck.length + 10 < count) {
@@ -77,25 +56,40 @@ const Game: React.FC = () => {
 
     if (player === "player") {
       setHand((prevHand) => [...prevHand, ...newCards]);
-      setSum(
-        (prevSum) =>
-          prevSum + newCards.reduce((acc, card) => acc + card.value, 0),
-      );
       setPlaying(true);
     } else {
       setDealerHand((prevDealerHand) => [...prevDealerHand, ...newCards]);
-      setDealerSum(
-        (prevDealerSum) =>
-          prevDealerSum + newCards.reduce((acc, card) => acc + card.value, 0),
-      );
     }
+  };
+
+  const getHandSum = (hand: CardI[]): string => {
+    let sum = hand.reduce((acc, card) => acc + card.value, 0);
+    let numAces = hand.filter((card) => card.rank === "A").length;
+  
+    // This will store the potential lower sum if Aces are reduced to 1
+    let minSum = sum;
+  
+    while (minSum > 21 && numAces > 0) {
+      minSum -= 10;
+      numAces--;
+    }
+  
+    // If both sums are the same, just return one value
+    if (sum === minSum) {
+      return `${sum}/${sum}`;
+    } else {
+      return `${minSum}/${sum}`;
+    }
+  };
+  
+  const getDealerHandSum = (hand: CardI[]): number => {
+    if (playing) return hand[0]!.value;
+    return hand.reduce((acc, card) => acc + card.value, 0);
   };
 
   const clearRound = () => {
     setHand([]);
     setDealerHand([]);
-    setSum(0);
-    setDealerSum(0);
   };
 
   const reset = () => {
@@ -108,9 +102,34 @@ const Game: React.FC = () => {
     setGameStarted(true);
   };
 
+  const checkWinner = () => {
+    const dealerSum = getDealerHandSum(dealerHand);
+    const sum = getHandSum(hand);
+    const minSum = parseInt(sum.split("/")[0]);
+    const maxSum = parseInt(sum.split("/")[1]);
+    if (dealerSum > 21) {
+      alert("Dealer Busts! You win!");
+      return ;
+    }
+    if (dealerSum < 17) {
+      dealCards("dealer", 1);
+      return ;
+    }
+    if (dealerSum === minSum) {
+      alert("Push!");
+    } else if (dealerSum > minSum) {
+      alert("Dealer Wins!");
+    } else if (sum > dealerSum) {
+      alert("You win!");
+    } else if (sum < dealerSum) {
+      alert("Dealer Wins!");
+    } 
+    setNextRound(true);
+  };
+
   const stand = () => {
     setPlaying(false);
-    dealCards("dealer", 1);
+    checkWinner();
   };
 
   const goToNextRound = () => {
@@ -167,14 +186,14 @@ const Game: React.FC = () => {
                 return (
                   <div
                     key={card.id}
-                    className="pattern-zigzag pattern-blue-500 pattern-bg-white pattern-size-4 pattern-opacity-100 flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-[#aaa] font-bold text-black"
+                    className="pattern-zigzag flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-[#aaa] font-bold text-black pattern-bg-white pattern-blue-500 pattern-opacity-100 pattern-size-4"
                     style={{ transform: `translate(-${index * 20}px)` }}
                   ></div>
                 );
               }
             })}
           </div>
-          <div>{dealerSum}</div>
+          <div>{getDealerHandSum(dealerHand)}</div>
         </div>
         <div className="flex flex-col items-center gap-4">
           <div
@@ -198,7 +217,7 @@ const Game: React.FC = () => {
               </div>
             ))}
           </div>
-          <div>{sum}</div>
+          <div>{getHandSum(hand)}</div>
         </div>
       </div>
       <div className="flex justify-center">

@@ -1,0 +1,27 @@
+/* game.css */
+
+.dealing-dealer {
+  animation: dealing-dealer 1000ms ease-in-out;
+}
+
+.dealing-player {
+  animation: dealing-player 1000ms ease-in-out;
+}
+
+@keyframes dealing-dealer {
+  0% {
+    transform: translate(0);
+  }
+  100% {
+    transform: translate(5rem, -7rem);
+  }
+}
+
+@keyframes dealing-player {
+  0% {
+    transform: translate(0);
+  }
+  100% {
+    transform: translate(5rem, 7rem);
+  }
+}

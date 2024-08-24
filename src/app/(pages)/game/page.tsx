@@ -227,8 +227,7 @@ const Game: React.FC = () => {
           <DeckComponent deckSize={deck.deck.length} />
           {/* Crads being given */}
           <div className="asbolute left-0 top-0 z-[10] ml-4 flex">
-            {cardsBeingGiven &&
-              cardsBeingGiven.map((card, index) => {
+            {cardsBeingGiven?.map((card, index) => {
                 if (isDealingDealer && index === 1) {
                   return (
                     <div

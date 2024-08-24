@@ -3,7 +3,7 @@
 // Home.tsx
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import Button from "~/components/Button";
+import Button from "~/components/ui/Button";
 
 export default function Home() {
 

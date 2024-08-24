@@ -22,7 +22,7 @@ export class Card {
     if (["J", "Q", "K"].includes(this.rank)) {
       return 10;
     } else if (this.rank === "A") {
-      return 11;
+      return 1;
     }
     return parseInt(this.rank);
   }

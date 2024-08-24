@@ -4,9 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "TL-Tools",
-  description: "Tools for Every Task",
-  icons: [{ rel: "icon", url: "/logo.png" }],
+  title: "Blackjack",
+  description: "Blackjack with online mode",
+  icons: [{ rel: "icon", url: "/logo.jpg" }],
 };
 
 export default function RootLayout({

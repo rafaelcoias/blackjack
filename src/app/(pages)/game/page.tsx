@@ -64,8 +64,8 @@ const Game: React.FC = () => {
       setNextRound(true);
       setPlaying(false);
       setTimeout(() => {
-        alert("Bust! Dealer wins!");
-      }, 800);
+        alert("Dealer wins!");
+      }, 500);
     }
   }, [hand, playing, roundStarted]);
 
@@ -88,23 +88,23 @@ const Game: React.FC = () => {
         if (checkBlackjack(dealerHand)) {
           setNextRound(true);
           setPlaying(false);
-          setTimeout(() => alert("Push!"), 800);
+          setTimeout(() => alert("Push!"), 500);
           setMoney((prevMoney) => prevMoney + bet);
         } else {
           setNextRound(true);
           setPlaying(false);
-          setTimeout(() => alert("Blackjack! You win!"), 800);
+          setTimeout(() => alert("Blackjack!"), 500);
           setMoney((prevMoney) => prevMoney + (bet * 3) / 2);
         }
-      }, 1200);
+      }, 300);
       return;
     }
     if (checkBlackjack(dealerHand)) {
       setNextRound(true);
       setPlaying(false);
       setTimeout(() => {
-        alert("Dealer has blackjack! You lose!");
-      }, 800);
+        alert("You lose!");
+      }, 500);
     }
   }, [roundStarted, gameStarted, hand, dealerHand]);
 
@@ -149,7 +149,7 @@ const Game: React.FC = () => {
     let winnerMessage = "";
     if (nextRound) return;
     if (dealerSum > 21) {
-      winnerMessage = "Dealer busts! You win!";
+      winnerMessage = "You win!";
       setMoney((prevMoney) => prevMoney + bet * 2);
     } else if (dealerSum === sum) {
       winnerMessage = "Push!";
@@ -160,7 +160,7 @@ const Game: React.FC = () => {
       winnerMessage = "You win!";
       setMoney((prevMoney) => prevMoney + bet * 2);
     }
-    if (winnerMessage) setTimeout(() => alert(winnerMessage), 800);
+    if (winnerMessage) setTimeout(() => alert(winnerMessage), 500);
     setNextRound(true);
   };
 
@@ -254,11 +254,11 @@ const Game: React.FC = () => {
 
   const play = () => {
     if (bet === 0) {
-      alert("Please place a bet");
+      alert("Please place a bet.");
       return;
     }
     if (bet > money) {
-      alert("You don't have enough money");
+      alert("You don't have enough money.");
       return;
     }
     reset();
@@ -269,12 +269,12 @@ const Game: React.FC = () => {
   };
 
   const split = () => {
-    alert("Splitting not implemented yet");
+    alert("Splitting not implemented yet.");
   };
 
   const double = () => {
     if (bet > money) {
-      alert("You don't have enough money");
+      alert("You don't have enough money to double.");
       return;
     }
     setMoney((prevMoney) => prevMoney - bet);
@@ -394,7 +394,7 @@ const Game: React.FC = () => {
           </div>
 
           {/* Bet */}
-          <div className="absolute left-1/2 top-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center gap-2 rounded-md px-4">
+          <div className="absolute left-1/2 top-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center gap-2 rounded-md px-4 border py-2">
             <span>{bet} $</span>
             <Image
               src="/content/images/chips.png"

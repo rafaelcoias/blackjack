@@ -9,31 +9,31 @@ export default function Card({ card, index }: { card: CardI; index: number }) {
     if (card?.rank === "J") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-0">👑</div>
-          <div className={`text-[1.5rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
+          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
         </div>
       );
     }
     if (card?.rank === "Q") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-0">👑</div>
-          <div className={`text-[1.5rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
+          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
         </div>
       );
     }
     if (card?.rank === "K") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-0">👑</div>
-          <div className={`text-[1.5rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
+          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
         </div>
       );
     }
     if (card?.rank === "A") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className={`text-[2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
         </div>
       );
     }
@@ -50,7 +50,7 @@ export default function Card({ card, index }: { card: CardI; index: number }) {
         card?.rank !== "Q" &&
         card?.rank !== "K" &&
         card?.rank !== "A" ? (
-          <div className={`flex h-full items-center gap-[6px] text-[.9rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>
+          <div className={`flex h-full items-center gap-[6px] text-[.7rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>
             <div
               className={`flex flex-col justify-between h-full leading-[16px]`}
             >

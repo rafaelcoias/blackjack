@@ -13,6 +13,7 @@ const DeckComponent: React.FC<{ deckSize: number }> = ({ deckSize }) => {
           style={{ transform: `translateX(-${index * 62}px)` }}
         />
       ))}
+      {/* <div className="absolute left-6 bottom-[-1.4rem] text-[.8rem]">{deckSize}</div> */}
     </div>
   );
 };

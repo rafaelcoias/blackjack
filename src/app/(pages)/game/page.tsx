@@ -3,18 +3,25 @@
 import React, { useState, useEffect } from "react";
 import Button from "~/components/ui/Button";
 import { Deck } from "~/components/objects/Deck";
-import { CardI } from "~/components/objects/Card";
+import { CardI, Card } from "~/components/objects/Card";
 import "~/styles/game.css";
 import DeckComponent from "~/components/ui/Deck";
+import Image from "next/image";
+import CardUI from "~/components/ui/Card";
+import GameButtons from "./components/GameButtons";
+import Chip from "~/components/ui/Chip";
+import GameOptions from "./components/GameOptions";
+import RoundOptions from "./components/RoundOptions";
 import { set } from "zod";
-import { get } from "http";
 
 const Game: React.FC = () => {
-  const [deck, setDeck] = useState<Deck>(() => new Deck(6));
+  const [deck, setDeck] = useState<Deck>();
+
   const [hand, setHand] = useState<CardI[]>([]);
   const [hand2, setHand2] = useState<CardI[]>([]);
   const [cardsBeingGiven, setCardsBeingGiven] = useState<CardI[]>([]);
   const [dealerHand, setDealerHand] = useState<CardI[]>([]);
+
   const [deckNeedReset, setDeckNeedReset] = useState<boolean>(false);
   const [nextRound, setNextRound] = useState<boolean>(false);
   const [playing, setPlaying] = useState<boolean>(false);
@@ -22,31 +29,48 @@ const Game: React.FC = () => {
   const [isDealing, setIsDealing] = useState<boolean>(false);
   const [isDealingDealer, setIsDealingDealer] = useState<boolean>(false);
   const [hasDoubled, setHasDoubled] = useState<boolean>(false);
+  const [roundStarted, setRoundStarted] = useState<boolean>(false);
+
+  const [bet, setBet] = useState<number>(0);
+  const [money, setMoney] = useState<GLfloat>(500.0);
+
+  // Set deck on first render
+  useEffect(() => {
+    const newDeck = new Deck(6);
+    setDeck(newDeck);
+  }, []);
 
   // Check if deck needs to be reset
   useEffect(() => {
-    if (deck.deck.length <= 10) {
+    if (deck && deck.deck.length <= 10) {
       setDeckNeedReset(true);
     }
   }, [deck]);
 
-  // Check if player busts or gets blackjack, if so end round
+  // Check if deck needs to be reset after round ends
   useEffect(() => {
-    if (!gameStarted || !playing) return;
+    if (deckNeedReset && nextRound) {
+      const newDeck = new Deck(6);
+      setDeck(newDeck);
+      setDeckNeedReset(false);
+    }
+  }, [deckNeedReset, nextRound]);
+
+  // Check if player busts, if so dealer wins and round ends
+  useEffect(() => {
+    if (!gameStarted || !playing || !roundStarted) return;
     const sum = getHandSum(hand);
     if (sum > 21) {
-      alert("Bust! Dealer wins!");
       setNextRound(true);
       setPlaying(false);
-    } else if (sum === 21 && hand.length === 2) {
-      alert("Blackjack!");
-      setNextRound(true);
-      setPlaying(false);
-    } else if (sum === 21) {
-      setPlaying(false);
+      setTimeout(() => {
+        alert("Bust! Dealer wins!");
+      }, 800);
     }
-  }, [hand]);
+  }, [hand, playing, roundStarted]);
 
+  // Check if dealer needs to draw more cards 
+  // or check winner when dealer has more than 17
   useEffect(() => {
     if (playing || nextRound || !gameStarted) return;
     if (getDealerHandSum(dealerHand) < 17) {
@@ -56,13 +80,37 @@ const Game: React.FC = () => {
     }
   }, [dealerHand, playing, nextRound, gameStarted]);
 
+  // When round starts check for blackjacks
+  useEffect(() => {
+    if (!roundStarted || !gameStarted) return;
+    if (checkBlackjack(hand) && dealerHand.length === 2) {
+      setTimeout(() => {
+        if (checkBlackjack(dealerHand)) {
+          setNextRound(true);
+          setPlaying(false);
+          setTimeout(() => alert("Push!"), 800);
+          setMoney((prevMoney) => prevMoney + bet);
+        } else {
+          setNextRound(true);
+          setPlaying(false);
+          setTimeout(() => alert("Blackjack! You win!"), 800);
+          setMoney((prevMoney) => prevMoney + (bet * 3) / 2);
+        }
+      }, 1200);
+      return;
+    }
+    if (checkBlackjack(dealerHand)) {
+      setNextRound(true);
+      setPlaying(false);
+      setTimeout(() => {
+        alert("Dealer has blackjack! You lose!");
+      }, 800);
+    }
+  }, [roundStarted, gameStarted, hand, dealerHand]);
+
   // Deal cards to player or dealer
   const dealCards = (player: string, count: number): void => {
     // Check if deck needs to be reset
-    if (deck.deck.length - count < 15) {
-      setDeckNeedReset(true);
-      return;
-    }
 
     // Start dealing animation
     if (player === "player") {
@@ -74,7 +122,7 @@ const Game: React.FC = () => {
     // Get cards from deck
     const newCards: CardI[] = [];
     for (let i = 0; i < count; i++) {
-      newCards.push(deck.dealCard());
+      newCards.push(deck!.dealCard());
     }
 
     setCardsBeingGiven(newCards);
@@ -92,21 +140,37 @@ const Game: React.FC = () => {
     }, 600);
   };
 
-  // Check winner
+  // Checks
+
   const checkWinner = () => {
     const dealerSum = getDealerHandSum(dealerHand);
     const sum = getHandSum(hand);
+
+    let winnerMessage = "";
     if (nextRound) return;
     if (dealerSum > 21) {
-      alert("Dealer Busts! You win!");
+      winnerMessage = "Dealer busts! You win!";
+      setMoney((prevMoney) => prevMoney + bet * 2);
     } else if (dealerSum === sum) {
-      alert("Push!");
+      winnerMessage = "Push!";
+      setMoney((prevMoney) => prevMoney + bet);
     } else if (dealerSum > sum) {
-      alert("Dealer Wins!");
+      winnerMessage = "Dealer wins!";
     } else if (sum > dealerSum) {
-      alert("You win!");
+      winnerMessage = "You win!";
+      setMoney((prevMoney) => prevMoney + bet * 2);
     }
+    if (winnerMessage) setTimeout(() => alert(winnerMessage), 800);
     setNextRound(true);
+  };
+
+  const checkBlackjack = (hand: CardI[]) => {
+    let sum = hand.reduce((acc, card) => acc + card.value, 0);
+    if (hand.some((card) => card.rank === "A") && sum + 10 <= 21) sum += 10;
+    if (sum === 21 && hand.length === 2) {
+      return true;
+    }
+    return false;
   };
 
   // Get sum of hands
@@ -122,7 +186,7 @@ const Game: React.FC = () => {
   const getHandSumToDisplay = (hand: CardI[]): string => {
     const sum = hand.reduce((acc, card) => acc + card.value, 0);
     if (hand.some((card) => card.rank === "A") && sum + 10 <= 21) {
-      if (!playing) return `${sum + 10}`;
+      if (!playing || sum + 10 === 21) return `${sum + 10}`;
       return `${sum} / ${sum + 10}`;
     }
     return `${sum}`;
@@ -136,6 +200,25 @@ const Game: React.FC = () => {
     return sum;
   };
 
+  const getDealerHandSumToDisplay = (hand: CardI[]): string => {
+    if (playing) return hand.length > 0 ? hand[0]!.value.toString() : "0";
+    const sum = hand.reduce((acc, card) => acc + card.value, 0);
+    if (
+      hand.some((card) => card.rank === "A") &&
+      sum + 10 <= 21 &&
+      !nextRound
+    ) {
+      return `${sum} / ${sum + 10}`;
+    } else if (
+      hand.some((card) => card.rank === "A") &&
+      sum + 10 <= 21 &&
+      nextRound
+    ) {
+      return `${sum + 10}`;
+    }
+    return `${sum}`;
+  };
+
   // Rounds
 
   const clearRound = () => {
@@ -145,24 +228,41 @@ const Game: React.FC = () => {
   };
 
   const goToNextRound = () => {
+    if (bet > money) {
+      alert("You don't have enough money");
+      return;
+    }
     setNextRound(false);
+    setRoundStarted(false);
     clearRound();
-    setIsDealing(true);
-    setIsDealingDealer(true);
-    dealCards("player", 2);
-    setTimeout(() => dealCards("dealer", 2), 1000);
+    setMoney((prevMoney) => prevMoney - bet);
+    dealCards("player", 1);
+    setTimeout(() => dealCards("dealer", 1), 1000);
+    setTimeout(() => dealCards("player", 1), 2000);
+    setTimeout(() => dealCards("dealer", 1), 3000);
+    setTimeout(() => setRoundStarted(true), 3800);
     setGameStarted(true);
     setPlaying(true);
   };
 
   const reset = () => {
-    const newDeck = new Deck(6);
-    setDeck(newDeck);
     setDeckNeedReset(false);
     goToNextRound();
   };
 
   // Actions
+
+  const play = () => {
+    if (bet === 0) {
+      alert("Please place a bet");
+      return;
+    }
+    if (bet > money) {
+      alert("You don't have enough money");
+      return;
+    }
+    reset();
+  };
 
   const stand = () => {
     setPlaying(false);
@@ -173,14 +273,75 @@ const Game: React.FC = () => {
   };
 
   const double = () => {
+    if (bet > money) {
+      alert("You don't have enough money");
+      return;
+    }
+    setMoney((prevMoney) => prevMoney - bet);
+    setBet((prevBet) => prevBet * 2);
     setHasDoubled(true);
     dealCards("player", 1);
     setTimeout(() => setPlaying(false), 1000);
   };
 
+  const makeBet = (value: number) => {
+    setBet((prevBet) => prevBet + value);
+  };
+
+  const resetBet = () => {
+    setGameStarted(false);
+    clearRound();
+    setBet(0);
+  };
+
+  // TESTS
+
+  // const forceDeal = () => {
+  //   setNextRound(false);
+  //   setRoundStarted(false);
+  //   clearRound();
+
+  //   const cardOnePlayer = new Card("♠️", "A", 1) as CardI;
+  //   const cardTwoPlayer = new Card("♥️", "K", 10) as CardI;
+  //   const cardOneDealer = new Card("♥️", "2", 10) as CardI;
+  //   const cardTwoDealer = new Card("♥️", "3", 10) as CardI;
+
+  //   dealCard("player", cardOnePlayer);
+  //   setTimeout(() => dealCard("dealer", cardOneDealer), 1000);
+  //   setTimeout(() => dealCard("player", cardTwoPlayer), 2000);
+  //   setTimeout(() => dealCard("dealer", cardTwoDealer), 3000);
+  //   setTimeout(() => setRoundStarted(true), 3500);
+  //   setGameStarted(true);
+  //   setPlaying(true);
+  // };
+
+  // const dealCard = (player: string, card: CardI): void => {
+  //   // Start dealing animation
+  //   if (player === "player") {
+  //     setIsDealing(true);
+  //   } else {
+  //     setIsDealingDealer(true);
+  //   }
+
+  //   setCardsBeingGiven([card]);
+
+  //   // Add cards to player or dealer hand after dealing animation
+  //   setTimeout(() => {
+  //     if (player === "player") {
+  //       setHand((prevHand) => [...prevHand, card]);
+  //       setIsDealing(false);
+  //     } else {
+  //       setDealerHand((prevHand) => [...prevHand, card]);
+  //       setIsDealingDealer(false);
+  //     }
+  //     setCardsBeingGiven([]);
+  //   }, 600);
+  // };
+
   return (
     <div className="flex h-full min-h-screen w-full flex-col items-center gap-4 bg-[#1b86d3] pt-10 text-white">
       <div className="relative flex w-full flex-col items-center justify-center gap-10">
+
         {/* Dealer Hand */}
         <div className="z-[5] flex flex-col items-center gap-4">
           <h1 className="text-[1.5rem] font-bold">DEALER</h1>
@@ -193,17 +354,8 @@ const Game: React.FC = () => {
             {dealerHand.map((card, index) => {
               if (index === 0 || !playing) {
                 return (
-                  <div
-                    key={card.id}
-                    className="flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-white font-bold text-black"
-                    style={{ transform: `translate(-${index * 20}px)` }}
-                  >
-                    <div>{card.rank}</div>
-                    <div
-                      className={`${card.suit === "♦️" || card.suit === "♥️" ? "text-red-500" : ""}`}
-                    >
-                      {card.suit}
-                    </div>
+                  <div key={index}>
+                    <CardUI card={card} index={index} />
                   </div>
                 );
               }
@@ -216,44 +368,44 @@ const Game: React.FC = () => {
               );
             })}
           </div>
-          <div>
-            {getDealerHandSum(dealerHand) === 1
-              ? `${getDealerHandSum(dealerHand)} / 11`
-              : getDealerHandSum(dealerHand)}
-          </div>
+          {gameStarted && <div>{getDealerHandSumToDisplay(dealerHand)}</div>}
         </div>
+
         {/* Deck in middle */}
-        <div className="relative z-[10] h-[6rem] w-[20.3rem]">
-          <DeckComponent deckSize={deck.deck.length} />
-          {/* Crads being given */}
+        <div className="relative z-[10] flex h-[6rem] w-[20.3rem]">
+          {
+            deck &&
+            <DeckComponent deckSize={deck.deck.length} />
+          }
+
+          {/* Cards being given */}
           <div className="asbolute left-0 top-0 z-[10] ml-4 flex">
             {cardsBeingGiven?.map((card, index) => {
-                if (isDealingDealer && index === 1) {
-                  return (
-                    <div
-                      key={card.id}
-                      className={`${isDealing ? "dealing-player" : "dealing-dealer"} pattern-zigzag flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-[#aaa] font-bold text-black pattern-bg-white pattern-blue-500 pattern-opacity-100 pattern-size-4`}
-                      style={{ transform: `translate(-${index * 55}px)` }}
-                    ></div>
-                  );
-                }
+              if (true) {
                 return (
                   <div
                     key={card.id}
-                    className={`${isDealing ? "dealing-player" : "dealing-dealer"} z-[5] flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-white font-bold text-black`}
+                    className={`${isDealing ? "dealing-player" : "dealing-dealer"} pattern-zigzag z-[10] flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-[#aaa] font-bold text-black pattern-bg-white pattern-blue-500 pattern-opacity-100 pattern-size-4`}
                     style={{ transform: `translate(-${index * 55}px)` }}
-                  >
-                    <div>{card.rank}</div>
-                    <div
-                      className={`${card.suit === "♦️" || card.suit === "♥️" ? "text-red-500" : ""}`}
-                    >
-                      {card.suit}
-                    </div>
-                  </div>
+                  ></div>
                 );
-              })}
+              }
+            })}
+          </div>
+
+          {/* Bet */}
+          <div className="absolute left-1/2 top-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col items-center justify-center gap-2 rounded-md px-4">
+            <span>{bet} $</span>
+            <Image
+              src="/content/images/chips.png"
+              alt="chips"
+              width={20}
+              height={20}
+              className="w-10"
+            />
           </div>
         </div>
+
         {/* Player Hand */}
         <div className="z-[5] flex flex-col items-center gap-4">
           <div
@@ -263,90 +415,48 @@ const Game: React.FC = () => {
             }}
           >
             {hand.map((card, index) => (
-              <div
-                key={card.id}
-                style={{ transform: `translate(-${index * 20}px)` }}
-                className={`flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-white font-bold text-black`}
-              >
-                <div>{card.rank}</div>
-                <div
-                  className={`${card.suit === "♦️" || card.suit === "♥️" ? "text-red-500" : ""}`}
-                >
-                  {card.suit}
-                </div>
+              <div key={index}>
+                <CardUI card={card} index={index} />
               </div>
             ))}
           </div>
-          <div>{getHandSumToDisplay(hand)}</div>
+          {gameStarted && <div>{getHandSumToDisplay(hand)}</div>}
         </div>
       </div>
-      <div className="flex justify-center">
+
+      {/* Options */}
+      <div className="mt-6 flex justify-center">
         {!gameStarted && (
-          <Button
-            color="var(--primary)"
-            onClick={reset}
-            style="mt-4 px-4 py-2 border border-white rounded text-white"
-          >
-            Play
-          </Button>
+          <GameOptions makeBet={makeBet} play={play} setBet={setBet} />
         )}
-        {deckNeedReset && (
-          <Button
-            color="#aaa"
-            onClick={reset}
-            style="mt-4 px-4 py-2 border border-white rounded text-white"
-          >
-            Reset Deck
-          </Button>
+        {nextRound && gameStarted && (
+          <RoundOptions goToNextRound={goToNextRound} resetBet={resetBet} />
         )}
-        {nextRound && (
-          <Button
-            color=""
-            onClick={goToNextRound}
-            style="mt-4 px-4 py-2 border border-white rounded text-white"
-          >
-            Next Round
-          </Button>
-        )}
-        {playing && !isDealing && !isDealingDealer && !hasDoubled && (
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <Button
-              color="#f22c3d"
-              onClick={stand}
-              style="px-4 py-2 border border-white rounded text-white"
-            >
-              Stand
-            </Button>
-            <Button
-              color="var(--primary)"
-              onClick={() => dealCards("player", 1)}
-              style="px-4 py-2 border border-white rounded text-white"
-            >
-              Hit
-            </Button>
-            {hand.length === 2 && hand[0]!.value === hand[1]!.value && (
-              <Button
-                color="#5662f6"
-                onClick={split}
-                style="px-4 py-2 border border-white rounded text-white"
-              >
-                Split
-              </Button>
-            )}
-            {
-              hand.length === 2 && !hasDoubled && (
-                <Button
-                  color="#f2c72c"
-                  onClick={double}
-                  style="px-4 py-2 border border-white rounded text-white"
-                >
-                  Double
-                </Button>
-              )
-            }
-          </div>
+        {playing && !hasDoubled && roundStarted && (
+          <GameButtons
+            stand={stand}
+            dealCards={dealCards}
+            split={split}
+            double={double}
+            hand={hand}
+          />
         )}
       </div>
+
+      {/* Money */}
+      <div className="rounded-md border border-blue-800 px-4 py-2">
+        <span>My Total: &ensp;{money}$</span>
+      </div>
+
+      {/* For tests */}
+
+      {/* <Button
+        color="#f2c72c"
+        onClick={forceDeal}
+        style="mt-4 px-4 py-2 border border-white rounded text-white"
+      >
+        Force Blackjack Test
+      </Button> */}
     </div>
   );
 };

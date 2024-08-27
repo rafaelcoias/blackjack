@@ -2,47 +2,75 @@
 
 import React from "react";
 import { CardI } from "../objects/Card";
-import { get } from "http";
 
-export default function Card({ card, index }: { card: CardI; index: number }) {
+export function BackCardUI({
+  index,
+}: {
+  index: number;
+}) {
+  void index;
+  return (
+    <div
+      className="pattern-zigzag flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-[#aaa] font-bold text-black pattern-bg-white pattern-blue-500 pattern-opacity-100 pattern-size-4"
+    ></div>
+  );
+}
+
+export function CardUI({ card, index, translateX }: { card: CardI; index: number, translateX:number }) {
   const getIcon = () => {
     if (card?.rank === "J") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
-          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="absolute right-1 top-0 text-[.9rem]">👑</div>
+          <div
+            className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}
+          >
+            {card?.suit}
+          </div>
         </div>
       );
     }
     if (card?.rank === "Q") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
-          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="absolute right-1 top-0 text-[.9rem]">👑</div>
+          <div
+            className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}
+          >
+            {card?.suit}
+          </div>
         </div>
       );
     }
     if (card?.rank === "K") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className="text-[.9rem] absolute top-0 right-1">👑</div>
-          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div className="absolute right-1 top-0 text-[.9rem]">👑</div>
+          <div
+            className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}
+          >
+            {card?.suit}
+          </div>
         </div>
       );
     }
     if (card?.rank === "A") {
       return (
         <div className="flex flex-col items-center justify-center">
-          <div className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>{card?.suit}</div>
+          <div
+            className={`text-[1.2rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}
+          >
+            {card?.suit}
+          </div>
         </div>
       );
     }
-  }
+  };
 
   return (
     <div
-      style={{ transform: `translate(-${index * 20}px)` }}
-      className={`relative flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-white pt-4 pb-5 font-bold text-black`}
+      style={{ transform: `translate(-${index * translateX}px)` }}
+      className={`relative flex h-24 w-16 flex-col items-center justify-center rounded-lg border-[2px] border-black bg-white pb-5 pt-4 font-bold text-black`}
     >
       <div className="absolute left-1 top-0 text-[.9rem]">{card?.rank}</div>
       <div className="flex h-full items-center justify-center">
@@ -50,9 +78,11 @@ export default function Card({ card, index }: { card: CardI; index: number }) {
         card?.rank !== "Q" &&
         card?.rank !== "K" &&
         card?.rank !== "A" ? (
-          <div className={`flex h-full items-center gap-[6px] text-[.7rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}>
+          <div
+            className={`flex h-full items-center gap-[6px] text-[.7rem] ${card?.suit === "♦️" || card?.suit === "♥️" ? "text-red-500" : ""}`}
+          >
             <div
-              className={`flex flex-col justify-between h-full leading-[16px]`}
+              className={`flex h-full flex-col justify-between leading-[16px]`}
             >
               {["4", "5", "6", "7", "8", "9", "10"].includes(
                 card?.value?.toString(),
@@ -68,7 +98,7 @@ export default function Card({ card, index }: { card: CardI; index: number }) {
               ) && <span>{card?.suit}</span>}
             </div>
             <div
-              className={`flex flex-col justify-evenly h-full leading-[16px]`}
+              className={`flex h-full flex-col justify-evenly leading-[16px]`}
             >
               {["2", "3", "7", "8", "10"].includes(card?.value?.toString()) && (
                 <span>{card?.suit}</span>
@@ -81,7 +111,7 @@ export default function Card({ card, index }: { card: CardI; index: number }) {
               )}
             </div>
             <div
-              className={`flex flex-col justify-between h-full leading-[16px]`}
+              className={`flex h-full flex-col justify-between leading-[16px]`}
             >
               {["4", "5", "6", "7", "8", "9", "10"].includes(
                 card?.value?.toString(),

@@ -1,27 +1,78 @@
-/* game.css */
-
 .dealing-dealer {
-  animation: dealing-dealer 1000ms ease-in-out;
+  animation: dealing-dealer 750ms ease-in-out;
+}
+
+.dealing-dealer-without-spin {
+  animation: dealing-dealer-without-spin 750ms ease-in-out;
 }
 
 .dealing-player {
-  animation: dealing-player 1000ms ease-in-out;
+  animation: dealing-player 750ms ease-in-out;
+}
+
+/* Flipping card */
+
+.card {
+	height: 100%;
+	position: relative;
+	z-index: 1;
+	float: left;
+  perspective: 1000px;
+	@apply relative flex h-24 w-16 flex-col items-center justify-center rounded-lg 
+}
+
+.wrap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 800ms linear;
+}
+
+.wrap.flipped {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  box-sizing: border-box
+}
+
+.d .wrap.flipped {
+  transform: rotate3d(45, 45, 0, 180deg);
+  box-shadow: none;
+}
+.d .face.back {
+  transform: rotate3d(45, 45, 0, 180deg);
+  backface-visibility: hidden;
 }
 
 @keyframes dealing-dealer {
   0% {
-    transform: translate(0);
+    transform: translate(0) rotate3d(0, 0, 0, 0deg);
   }
   100% {
-    transform: translate(5rem, -7rem);
+    transform: translate(7rem, -11rem) rotate3d(1, 1, 0, 180deg);
   }
 }
 
 @keyframes dealing-player {
   0% {
-    transform: translate(0);
+    transform: translate(0) rotate3d(0, 0, 0, 0deg);
   }
   100% {
-    transform: translate(5rem, 7rem);
+    transform: translate(7rem, 9rem) rotate3d(1, 1, 0, 180deg);
+  }
+}
+
+@keyframes dealing-dealer-without-spin {
+  0% {
+    transform: translate(0) rotate3d(0, 0, 0, 0deg);
+  }
+  100% {
+    transform: translate(7rem, -11rem) rotate3d(1, 1, 0, 0deg);
   }
 }

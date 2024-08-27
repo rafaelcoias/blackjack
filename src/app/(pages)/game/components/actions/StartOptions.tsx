@@ -1,6 +1,6 @@
 import React from "react";
-import Button from "../../../../components/ui/Button";
-import Chip from "../../../../components/ui/Chip";
+import Button from "../../../../../components/ui/Button";
+import Chip from "../../../../../components/ui/Chip";
 
 export default function GameOptions({makeBet, play, setBet}: {makeBet: (bet: number) => void, play: () => void, setBet: (bet: number) => void}) {
   return (

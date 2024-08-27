@@ -5,7 +5,7 @@ const DeckComponent: React.FC<{ deckSize: number }> = ({ deckSize }) => {
   const maxVisibleCards = 5; 
 
   return (
-    <div className="flex z-[5] absolute top-0 left-0">
+    <div className="flex z-[5] absolute top-0 right-0 ">
       {Array.from({ length: Math.min(deckSize, maxVisibleCards) }).map((_, index) => (
         <div
           key={index}

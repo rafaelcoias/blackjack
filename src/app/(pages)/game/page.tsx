@@ -11,6 +11,7 @@ import RoundOptions from "./components/actions/RoundOptions";
 import PlayerHand from "./components/hands/player";
 import DeckAndBet from "./components/hands/deckAndBet";
 import DealerHand from "./components/hands/dealer";
+import { set } from "zod";
 
 const Game: React.FC = () => {
   const [deck, setDeck] = useState<Deck>();
@@ -34,6 +35,7 @@ const Game: React.FC = () => {
   const [hasSplitted, setHasSplitted] = useState<boolean>(false);
   const [roundStarted, setRoundStarted] = useState<boolean>(false);
   const [isFlippingCard, setIsFlippingCard] = useState<boolean>(false);
+  const [checkSplittedHand, setCheckSplittedHand] = useState<boolean>(false);
 
   // =========================== USE EFFECTS =====================================
 
@@ -78,13 +80,13 @@ const Game: React.FC = () => {
         alert("Bust! Dealer wins!");
       }, 500);
     } else if (sum === 21) {
-      stand(false);
+      stand(true);
     }
   }, [hand, playing, roundStarted]);
 
   // Check if player second hand busts, if so stops playing
   useEffect(() => {
-    if (!gameStarted || !playing || !roundStarted || !hasSplitted) return;
+    if (!gameStarted || !playing || !roundStarted || !hasSplitted || handPlaying === 1) return;
     const sum = getHandSum(hand2);
     if (sum > 21 || sum === 21) {
       stand(true);
@@ -101,6 +103,12 @@ const Game: React.FC = () => {
     }
     checkWinner();
   }, [dealerHand, playing, nextRound, gameStarted]);
+
+  // Check second hand when first hand is done
+  useEffect(() => {
+    if (!checkSplittedHand || nextRound) return;
+    checkWinner();
+  }, [checkSplittedHand, hasSplitted]);
 
   // When round starts check for blackjacks
   useEffect(() => {
@@ -195,23 +203,32 @@ const Game: React.FC = () => {
 
     let winnerMessage = "";
     if (nextRound) return;
-    if (dealerSum > 21 || (sum > dealerSum && sum <= 21)) {
-      winnerMessage = "You win!";
-      if (hasDoubled) setMoney((prevMoney) => prevMoney + inicialBet * 4);
-      else setMoney((prevMoney) => prevMoney + inicialBet * 2);
+    if (sum > 21) {
+      winnerMessage = "Bust! You lose!";
+    } else if (dealerSum > 21 || (sum > dealerSum && sum <= 21)) {
+      if (handPlaying === 1 && hand.every((card) => card.rank === "7") || handPlaying === 2 && hand2.every((card) => card.rank === "7")) {
+        winnerMessage = "Triple Seven, x3 Money!";
+        setMoney((prevMoney) => prevMoney + (inicialBet * 3));
+      } else {
+        winnerMessage = "You win!";
+        if (hasDoubled) setMoney((prevMoney) => prevMoney + (inicialBet * 4));
+        else setMoney((prevMoney) => prevMoney + (inicialBet * 2));
+      }
     } else if (dealerSum === sum) {
       winnerMessage = "Push!";
       setMoney((prevMoney) => prevMoney + inicialBet);
     } else if (dealerSum > sum) {
       winnerMessage = "Dealer wins!";
-    } else if (sum > 21) {
-      winnerMessage = "Bust! You lose!";
     }
-    if (winnerMessage) setTimeout(() => alert(winnerMessage), 500);
-    if (!hasSplitted || (hasSplitted && handPlaying === 2)) {
+    setTimeout(() => alert(winnerMessage), 500);
+    if (!hasSplitted || checkSplittedHand) {
+      setCheckSplittedHand(false);
       setNextRound(true);
     } else {
-      setHandPlaying(1);
+      setTimeout(() => {
+        setHandPlaying(1);
+        setCheckSplittedHand(true);
+      }, 500);
     }
   };
 
@@ -331,15 +348,20 @@ const Game: React.FC = () => {
     }
     setMoney((prevMoney) => prevMoney - inicialBet);
     setBet((prevBet) => prevBet + inicialBet);
-    if (!hasSplitted) {
-      setHasDoubled(true);
-      dealCards("player", 1);
-    } else {
-      dealCards("player", 1, true);
-    }
 
-    if (hasSplitted) setTimeout(() => setHandPlaying(2), 1000);
-    else setTimeout(() => setPlaying(false), 1000);
+    if (hasSplitted) {
+      if (handPlaying === 1) {
+        dealCards("player", 1);
+        setTimeout(() => setHandPlaying(2), 1000);
+        return;
+      }
+      dealCards("player", 1, true);
+      setTimeout(() => setPlaying(false), 1000);
+      return;
+    }
+    setHasDoubled(true);
+    dealCards("player", 1);
+    setTimeout(() => setPlaying(false), 1000);
   };
 
   const makeBet = (value: number) => {
@@ -354,45 +376,46 @@ const Game: React.FC = () => {
 
   // TESTS
 
-  const forceDeal = () => {
-    setNextRound(false);
-    setRoundStarted(false);
-    clearRound();
-    setBet(inicialBet);
+  // const forceDeal = () => {
+  //   setNextRound(false);
+  //   setRoundStarted(false);
+  //   clearRound();
+  //   setBet(inicialBet);
+  //   setMoney((prevMoney) => prevMoney - inicialBet);
 
-    const cardOnePlayer = new Card("♠️", "7", 1) as CardI;
-    const cardTwoPlayer = new Card("♥️", "7", 10) as CardI;
-    const cardOneDealer = new Card("♥️", "2", 10) as CardI;
-    const cardTwoDealer = new Card("♥️", "3", 10) as CardI;
+  //   const cardOnePlayer = new Card("♠️", "A", 1) as CardI;
+  //   const cardTwoPlayer = new Card("♥️", "J", 2) as CardI;
+  //   const cardOneDealer = new Card("♥️", "2", 3) as CardI;
+  //   const cardTwoDealer = new Card("♠️", "2", 4) as CardI;
 
-    dealCard("player", cardOnePlayer);
-    setTimeout(() => dealCard("dealer", cardOneDealer), 1000);
-    setTimeout(() => dealCard("player", cardTwoPlayer), 2000);
-    setTimeout(() => dealCard("dealer", cardTwoDealer), 3000);
-    setTimeout(() => setRoundStarted(true), 3500);
-    setGameStarted(true);
-    setPlaying(true);
-  };
+  //   dealCard("player", cardOnePlayer);
+  //   setTimeout(() => dealCard("dealer", cardOneDealer), 1000);
+  //   setTimeout(() => dealCard("player", cardTwoPlayer), 2000);
+  //   setTimeout(() => dealCard("dealer", cardTwoDealer), 3000);
+  //   setTimeout(() => setRoundStarted(true), 3500);
+  //   setGameStarted(true);
+  //   setPlaying(true);
+  // };
 
-  const dealCard = (player: string, card: CardI): void => {
-    // Start dealing animation
-    if (player === "player") {
-      setIsDealing(true);
-    }
+  // const dealCard = (player: string, card: CardI): void => {
+  //   // Start dealing animation
+  //   if (player === "player") {
+  //     setIsDealing(true);
+  //   }
 
-    setCardsBeingGiven([card]);
+  //   setCardsBeingGiven([card]);
 
-    // Add cards to player or dealer hand after dealing animation
-    setTimeout(() => {
-      if (player === "player") {
-        setHand((prevHand) => [...prevHand, card]);
-        setIsDealing(false);
-      } else {
-        setDealerHand((prevHand) => [...prevHand, card]);
-      }
-      setCardsBeingGiven([]);
-    }, 600);
-  };
+  //   // Add cards to player or dealer hand after dealing animation
+  //   setTimeout(() => {
+  //     if (player === "player") {
+  //       setHand((prevHand) => [...prevHand, card]);
+  //       setIsDealing(false);
+  //     } else {
+  //       setDealerHand((prevHand) => [...prevHand, card]);
+  //     }
+  //     setCardsBeingGiven([]);
+  //   }, 600);
+  // };
 
   // ================================== WINDOW ==================================
 
@@ -454,13 +477,13 @@ const Game: React.FC = () => {
 
       {/* For tests */}
 
-      <Button
+      {/* <Button
         color=""
         onClick={forceDeal}
         style="mt-4 px-4 py-2 border border-white rounded text-white"
       >
         Force Cards Test
-      </Button>
+      </Button> */}
     </div>
   );
 };

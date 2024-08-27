@@ -9,7 +9,7 @@ export default function DealerHand({
   isFlippingCard,
   nextRound,
 }: {
-  dealerHand: any[];
+  dealerHand: CardI[];
   gameStarted: boolean;
   playing: boolean;
   isFlippingCard: boolean;
@@ -54,6 +54,7 @@ export default function DealerHand({
           return (
             <div
               className="card post d"
+              key={index}
               style={{ transform: `translateX(-${index * 20}px)` }}
             >
               <div className={`wrap ${isFlippingCard ? "flipped" : ""}`}>

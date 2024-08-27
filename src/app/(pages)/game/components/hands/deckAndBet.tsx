@@ -14,7 +14,7 @@ export default function DeckAndBet({ deck, cardsBeingGiven, bet, isDealing, deal
       <div className="asbolute left-0 top-0 z-[10] ml-4 flex">
         {cardsBeingGiven?.map((card, index) => {
           return (
-            <div className={`card post d`}>
+            <div className={`card post d`} key={index}>
               <div
                 className={`wrap ${isDealing ? "dealing-player" : !isDealing && dealerHand.length === 1 ? "dealing-dealer-without-spin" : "dealing-dealer"}`}
               >

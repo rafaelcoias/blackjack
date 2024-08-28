@@ -216,7 +216,8 @@ const Game: React.FC = () => {
       }
     } else if (dealerSum === sum) {
       winnerMessage = "Push!";
-      setMoney((prevMoney) => prevMoney + inicialBet);
+      if (hasDoubled) setMoney((prevMoney) => prevMoney + (inicialBet * 2));
+      else setMoney((prevMoney) => prevMoney + inicialBet);
     } else if (dealerSum > sum) {
       winnerMessage = "Dealer wins!";
     }

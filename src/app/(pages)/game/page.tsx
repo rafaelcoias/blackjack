@@ -25,6 +25,7 @@ const Game: React.FC = () => {
   const [bet, setBet] = useState<number>(0);
   const [inicialBet, setInicialBet] = useState<number>(0);
   const [money, setMoney] = useState<GLfloat>(-1);
+  const [countToMoney, setCountToMoney] = useState<number>(0);
 
   const [deckNeedReset, setDeckNeedReset] = useState<boolean>(false);
   const [nextRound, setNextRound] = useState<boolean>(false);
@@ -152,6 +153,13 @@ const Game: React.FC = () => {
       }
     };
   }, [money]);
+
+  useEffect(() => {
+    if (countToMoney === 15 && money < 100) {
+      setMoney((prev) => prev + 500);
+      setCountToMoney(0);
+    }
+  }, [countToMoney])
 
   // =============================== FUNCTIONS ===================================
 
@@ -472,7 +480,7 @@ const Game: React.FC = () => {
       </div>
 
       {/* Money */}
-      <div className="rounded-md border border-blue-800 px-4 py-2">
+      <div className="rounded-md border border-blue-800 px-4 py-2" onClick={() => setCountToMoney((prev:number) => prev + 1)}>
         <span>My Total: &ensp;{money}$</span>
       </div>
 
